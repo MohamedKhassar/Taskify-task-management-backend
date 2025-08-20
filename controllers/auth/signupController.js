@@ -20,10 +20,14 @@ const signUp = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error during sign up:", error);
+    if (error.name === "ValidationError") {
+      const errors = Object.values(error.errors).map(
+        (e) => e.properties.message
+      );
+      return res.status(400).json({ errors });
+    }
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 module.exports = { signUp };
