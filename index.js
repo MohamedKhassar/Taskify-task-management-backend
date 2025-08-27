@@ -4,6 +4,8 @@ const app = express();
 import { config } from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import { connectDB } from "./connectDB.js";
+import taskRoutes from "./routes/taskRoutes.js";
+import { protect } from "./middleware/authMiddleware.js";
 const FRONT_ORIGIN = process.env.FRONT_ORIGIN || "http://localhost:5173";
 const PORT = process.env.PORT;
 const HOST = process.env.HOST;
@@ -32,8 +34,9 @@ app.use((err, req, res, next) => {
   next(err);
 });
 app.use(express.urlencoded({ extended: true })); // for form data
-app.use(cors({ origin: [FRONT_ORIGIN,"http://192.168.1.3:5173"] }));
+app.use(cors({ origin: [FRONT_ORIGIN, "http://192.168.1.3:5173"] }));
 app.use("/api/auth", authRoutes);
+app.use("/api", protect, taskRoutes);
 
 app.listen(PORT, HOST, () => {
   console.log("Server is running on port 8080");
