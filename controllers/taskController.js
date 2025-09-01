@@ -36,7 +36,19 @@ export const createTask = async (req, res) => {
 export const getTask = async (req, res) => {
   try {
     const userObjectId = req.user._id;
-    const tasks = await TaskModel.find({createdBy:userObjectId});
+    const { query } = req.query;
+    let tasks;
+    if (query) {
+      tasks = await TaskModel.find({
+        createdBy: userObjectId,
+        deletedAt: { $exists: true, $ne: null },
+      });
+    } else {
+      tasks = await TaskModel.find({
+        createdBy: userObjectId,
+        deletedAt: null,
+      });
+    }
     if (tasks.length > 0) {
       return res.status(200).json(tasks);
     }
@@ -45,5 +57,24 @@ export const getTask = async (req, res) => {
   } catch (error) {
     console.error("Error fetching tasks:", error);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const SoftDeleteTaskByIds = async (req, res) => {
+  try {
+    const Ids = req.body || [];
+
+    await TaskModel.updateMany(
+      { _id: { $in: Ids } },
+      { $set: { deletedAt: new Date() } }
+    );
+
+    res.status(200).json({
+      message: `${Ids.length} Task${
+        Ids.length > 1 ? "s have been" : " has been"
+      } Moved to Trash Successfully`,
+    });
+  } catch (error) {
+    return res.status(400).json(error);
   }
 };
