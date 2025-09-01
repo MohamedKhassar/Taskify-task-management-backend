@@ -37,18 +37,9 @@ export const getTask = async (req, res) => {
   try {
     const userObjectId = req.user._id;
     const { query } = req.query;
-    let tasks;
-    if (query) {
-      tasks = await TaskModel.find({
-        createdBy: userObjectId,
-        deletedAt: { $exists: true, $ne: null },
-      });
-    } else {
-      tasks = await TaskModel.find({
-        createdBy: userObjectId,
-        deletedAt: null,
-      });
-    }
+    let tasks = await TaskModel.find({
+      createdBy: userObjectId,
+    });
     if (tasks.length > 0) {
       return res.status(200).json(tasks);
     }
@@ -73,6 +64,21 @@ export const SoftDeleteTaskByIds = async (req, res) => {
       message: `${Ids.length} Task${
         Ids.length > 1 ? "s have been" : " has been"
       } Moved to Trash Successfully`,
+    });
+  } catch (error) {
+    return res.status(400).json(error);
+  }
+};
+export const DeleteTaskByIds = async (req, res) => {
+  try {
+    const Ids = req.body || [];
+    console.log(Ids);
+    await TaskModel.deleteMany({ _id: { $in: Ids } });
+
+    res.status(200).json({
+      message: `${Ids.length} Task${
+        Ids.length > 1 ? "s have been" : " has been"
+      } Deleted Successfully`,
     });
   } catch (error) {
     return res.status(400).json(error);
