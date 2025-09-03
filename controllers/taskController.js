@@ -68,6 +68,24 @@ export const SoftDeleteTaskByIds = async (req, res) => {
     return res.status(400).json(error);
   }
 };
+export const UndoDeleteTaskByIds = async (req, res) => {
+  try {
+    const Ids = req.body || [];
+
+    await TaskModel.updateMany(
+      { _id: { $in: Ids } },
+      { $set: { deletedAt: null } }
+    );
+
+    res.status(200).json({
+      message: `${Ids.length} Task${
+        Ids.length > 1 ? "s have been" : " has been"
+      } Restored Successfully`,
+    });
+  } catch (error) {
+    return res.status(400).json(error);
+  }
+};
 export const DeleteTaskByIds = async (req, res) => {
   try {
     const Ids = req.body || [];
