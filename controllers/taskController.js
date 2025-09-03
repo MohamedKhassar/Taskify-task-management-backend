@@ -36,7 +36,6 @@ export const createTask = async (req, res) => {
 export const getTask = async (req, res) => {
   try {
     const userObjectId = req.user._id;
-    const { query } = req.query;
     let tasks = await TaskModel.find({
       createdBy: userObjectId,
     });
@@ -72,7 +71,6 @@ export const SoftDeleteTaskByIds = async (req, res) => {
 export const DeleteTaskByIds = async (req, res) => {
   try {
     const Ids = req.body || [];
-    console.log(Ids);
     await TaskModel.deleteMany({ _id: { $in: Ids } });
 
     res.status(200).json({
@@ -82,5 +80,24 @@ export const DeleteTaskByIds = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json(error);
+  }
+};
+
+export const EditTask = async (req, res) => {
+  try {
+    const data = req.body || {};
+    const { id } = req.params;
+
+    const UpdatedTask = await TaskModel.findOneAndUpdate({ _id: id }, data, {
+      new: true,
+    });
+
+    res.status(201).json({
+      message: "Task updated successfully",
+      task: UpdatedTask,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
   }
 };
